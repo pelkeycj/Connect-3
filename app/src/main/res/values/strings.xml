@@ -5,4 +5,8 @@
     <string name="win_text">You won!</string>
     <string name="draw_text">The game is a draw.</string>
     <string name="lose_text">You lost.</string>
+    <string name="newgame_button">New game</string>
+    <string name="blue_score">Blue: 0</string>
+    <string name="red_score">Red: \  0</string>
+    <string name="winner_banner"></string>
 </resources>

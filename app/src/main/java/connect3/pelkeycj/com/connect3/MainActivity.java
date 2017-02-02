@@ -1,21 +1,17 @@
-package connect3.pelkeycj.com.connect3; 
+package connect3.pelkeycj.com.connect3;
 
-import android.app.Activity;
-import android.graphics.drawable.Drawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
-
-import static connect3.pelkeycj.com.connect3.R.id.bottomLeft;
+import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
+    boolean gameOver;
     Player player1 = new Player("Blue", R.drawable.blue);
     Player player2 = new Player("Red", R.drawable.red);
     Player currentPlayer = player1;
@@ -27,12 +23,46 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.currentPlayer = player1;
+        this.gameOver = false;
     }
+
+    public void playAgain(View view) {
+        TextView banner = (TextView) findViewById(R.id.winner_banner);
+        banner.setText(null);
+
+        this.board.reset(this);
+        this.gameOver = false;
+    }
+
+    // increment current player score and update display
+    void updatePlayerScore() {
+        this.currentPlayer.score++;
+        TextView banner = (TextView) findViewById(R.id.winner_banner);
+
+        if (this.currentPlayer.name.equals("Blue")) {
+            TextView scoreView = (TextView) findViewById(R.id.score_blue);
+            scoreView.setText("Blue: " + this.currentPlayer.score);
+
+            // show winner banner
+            banner.setText("Blue won!");
+
+        }
+        else {
+            TextView scoreView = (TextView) findViewById(R.id.score_red);
+            scoreView.setText("Red:  " + this.currentPlayer.score);
+            banner.setText("Red won!");
+        }
+    }
+
 
     // we need to add an onClick method for each of the columns?
     public void dropIn(View view) {
         ImageView imgView = (ImageView) view;
 
+        // if game won, cannot make move
+        if (this.gameOver) {
+            return;
+        }
 
         // ensure player made a valid choice
         // drop chip if valid
@@ -41,12 +71,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (board.isGameWon()) {
-            this.currentPlayer.score++;
-            Log.d("D", "Score: " + this.currentPlayer.score);
+            this.gameOver = true;
+            this.updatePlayerScore();
             this.message(R.string.win_text);
         }
 
         if (board.isGameDraw()) {
+            this.gameOver = true;
             this.message(R.string.draw_text);
         }
 
@@ -92,20 +123,20 @@ class Tile {
     }
 
     // is this Tile in the given row, col position of the grid?
-    public boolean isInPosition(int row, int col) {
+    boolean isInPosition(int row, int col) {
         return this.row == row
                 && this.col == col;
     }
 
-    public int getRow() {
+    int getRow() {
         return this.row;
     }
 
-    public int getCol() {
+    int getCol() {
         return this.col;
     }
 
-    public int getID() {
+    int getID() {
         return this.id;
     }
 }
@@ -129,7 +160,7 @@ class TileList {
     }
 
     // get tile that matches position
-    public Tile getTile(int row, int col) {
+    Tile getTile(int row, int col) {
         for (Tile tile : tileList) {
             if (tile.isInPosition(row, col)) {
                 return tile;
@@ -140,7 +171,7 @@ class TileList {
     }
 
     // get tile that matches ID
-    public Tile getTile(int id) {
+    Tile getTile(int id) {
         for (Tile tile : tileList) {
             if (tile.getID() == id) {
                 return tile;
@@ -149,6 +180,14 @@ class TileList {
 
         throw new IllegalArgumentException("Illegal ID: " + id);
     }
+
+    void resetImg(MainActivity activity) {
+        for (Tile tile : tileList) {
+            ImageView img = (ImageView) activity.findViewById(tile.getID());
+            img.setImageDrawable(null);
+        }
+    }
+
 
 }
 
@@ -163,10 +202,12 @@ class GameBoard {
 
     // drops the players chip in the given tile if open
     // true if successful
-    public boolean dropIfValidMove(ImageView view, Player player) {
+    boolean dropIfValidMove(ImageView view, Player player) {
         Tile tile = this.tileList.getTile(view.getId());
         int row = tile.getRow();
         int col = tile.getCol();
+
+        Log.d("D", "boardval=" + this.board[row][col]);
 
         if (this.board[row][col] == 0) { // open position
             this.board[row][col] = player.chip;
@@ -177,7 +218,7 @@ class GameBoard {
     }
 
     // drop the player at the given imageView
-    public void dropPlayer(ImageView view, int player) {
+    void dropPlayer(ImageView view, int player) {
         view.setTranslationY(-1000f);
         view.setImageResource(player);
         view.animate().translationY(1f).setDuration(300).setStartDelay(50);
@@ -232,139 +273,18 @@ class GameBoard {
         return true;
     }
 
-
-}
-
-
-/*
-
-class Board {
-    TileList tileList;
-    int chipPlayer = R.drawable.blue;
-    int chipAI = R.drawable.red;
-    // 0 represents unplayed position
-    int[][] board;
-
-    Board() {
-        this.board = new int[3][3];
-        this.tileList = new TileList();
-    }
-
-
-
-    // if this tile is open, drop chip and
-    public boolean dropIfValidMove(ImageView imgView) {
-        Tile tile = this.tileList.getTile(imgView.getId());
-        int row = tile.getRow();
-        int col = tile.getCol();
-
-        if (this.board[row][col] == 0) {
-            this.board[row][col] = this.chipPlayer; // occupy space
-            dropPlayer(imgView, this.chipPlayer);
-            Log.d("BOARD", "Row: " + row + "  Col: "+ col + "  Val: " + this.board[row][col]);
-            return true;
-        }
-        return false;
-    }
-
-    // drop the chip at the given tile
-    public void dropPlayer(ImageView imgView, int chip) {
-        int startDelay = 50;
-        imgView.setTranslationY(-1000f);
-        imgView.setImageResource(chip);
-        if (chip == R.drawable.blue) {
-            startDelay = 1500;
-        }
-        imgView.animate().translationY(1f).setDuration(200).setStartDelay(50);
-
-
-    }
-
-    // check if a player or AI has won
-    public boolean checkWin() {
-        for (int i = 0; i < 3; i++) {
-            // horizontal
-            if (this.board[i][0] == this.board[i][1]
-                    && this.board[i][1] == this.board[i][2]
-                    && this.board[i][2] != 0) {
-                return true;
-            }
-
-            // vertical
-            if (this.board[0][i] == this.board[1][i]
-                    && this.board[1][i] == board[2][i]
-                    && this.board[2][i] != 0) {
-                return true;
-            }
-        }
-
-
-        // top-left -> bottom-right diagonal
-        if (this.board[0][0] == this.board[1][1]
-                && this.board[1][1] == this.board[2][2]
-                && this.board[2][2] != 0) {
-            return true;
-        }
-
-        // bottom-left -> top-right diagonal
-        if (this.board[2][0] == this.board[1][1]
-                && this.board[1][1] == this.board[0][2]
-                && this.board[0][2] != 0) {
-            return true;
-        }
-
-        return false;
-    }
-
-    // check if all positions have been occupied
-    public boolean checkDraw() {
+    // reset board tile images and board
+    void reset(MainActivity activity) {
+        // reset tile images
+        this.tileList.resetImg(activity);
+        // reset board
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                if (this.board[i][j] == 0) {
-                    return false;
-                }
+                this.board[i][j] = 0;
             }
         }
-        return true;
+
     }
 
-
-    public void setAI(MainActivity activity) {
-        Tile occupied = this.setRand(activity);
-        this.board[occupied.getRow()][occupied.getCol()] = 2;
-    }
-
-    // randomly place AI chip
-    public Tile setRand(MainActivity activity) {
-        Log.d("setRand", "entered setRand");
-        ArrayList<Integer> openTileIDs = new ArrayList<Integer>();
-        openTileIDs = this.getOpenTiles();
-
-        // get random tile
-        Random rand = new Random();
-        int id = openTileIDs.get(rand.nextInt(openTileIDs.size()));
-        ImageView imgView = (ImageView) activity.findViewById(id);
-
-        this.dropPlayer(imgView, this.chipAI);
-        return tileList.getTile(imgView.getId());
-    }
-
-    public ArrayList<Integer> getOpenTiles() {
-        Log.d("tiles", "entered getOpenTiles()");
-        ArrayList<Integer> openTileIDs = new ArrayList<Integer>(0);
-
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (this.board[i][j] == 0) {
-                    int openID = this.tileList.getTile(i, j).getID();
-                    openTileIDs.add(openID);
-                }
-            }
-        }
-        return openTileIDs;
-    }
 
 }
-*/
-
-

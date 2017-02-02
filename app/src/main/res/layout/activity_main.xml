@@ -121,6 +121,16 @@
 
     </GridLayout>
 
+    <Button
+        android:text="@string/newgame_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/button"
+        android:onClick="playAgain" />
+
     <TextView
         android:text="@string/game_text"
         android:layout_width="wrap_content"
@@ -132,14 +142,33 @@
         android:layout_alignParentStart="true" />
 
     <TextView
-        android:text="@string/game_text2"
+        android:text="@string/red_score"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView2"
-        android:layout_below="@+id/textView"
+        android:id="@+id/score_red"
+        android:layout_below="@+id/button"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="17dp"
+        android:textSize="18sp" />
+
+    <TextView
+        android:text="@string/blue_score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/score_blue"
+        android:layout_below="@+id/button"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:textSize="18sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/winner_banner"
+        android:textSize="26sp"
+        android:layout_alignTop="@+id/score_red"
+        android:layout_centerHorizontal="true" />
 
 
 </RelativeLayout>
