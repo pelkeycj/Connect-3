@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Connect 3</string>
+    <string name="game_text">Tap to drop your chips</string>
+    <string name="game_text2">Three in a row wins!</string>
+    <string name="win_text">You won!</string>
+    <string name="draw_text">The game is a draw.</string>
+    <string name="lose_text">You lost.</string>
 </resources>
